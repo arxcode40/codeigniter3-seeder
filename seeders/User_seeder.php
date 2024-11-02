@@ -1,13 +1,11 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class User_seeder {
-
-	protected $CI;
+class User_seeder extends Seeder {
 
 	public function __construct()
 	{
-		$this->CI =& get_instance();
+		parent::__construct();
 	}
 
 	public function run()

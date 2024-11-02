@@ -10,6 +10,7 @@ class Seeder {
 	public function __construct($config = array())
 	{
 		$this->CI =& get_instance();
+		$this->CI->lang->load('seeder');
 
 		if (empty($config))
 		{
@@ -24,15 +25,42 @@ class Seeder {
 
 		if ($this->_seeder_enabled !== TRUE)
 		{
-			show_error('Seeders has been loaded but is disabled or set up incorrectly.');
+			show_error($this->CI->lang->line('seeder_not_enabled'));
 		}
+
+		$this->_seeder_path !== '' OR $this->_seeder_path = APPPATH.'seeders/';
+		$this->_seeder_path = rtrim($this->_seeder_path, '/').'/';
 	}
 
 	public function call($seeder_name)
 	{
-		require_once($this->_seeder_path.$seeder_name.'.php');
+		$file = $this->_seeder_path.$seeder_name.'.php';
 
-		$seeder = new $seeder_name();
-		$seeder->run();
+		if (file_exists($file) === FALSE)
+		{
+			show_error(sprintf($this->CI->lang->line('seeder_file_doesnt_exist'), $seeder_name));
+		}
+		else
+		{
+			include_once($file);
+		}
+
+		if (class_exists($seeder_name, FALSE) === FALSE)
+		{
+			show_error(sprintf($this->CI->lang->line('seeder_class_doesnt_exist'), $seeder_name));
+		}
+		else
+		{
+			$seeder = new $seeder_name();
+		}
+
+		if (method_exists($seeder_name, 'run') === FALSE)
+		{
+			show_error(sprintf($this->CI->lang->line('seeder_missing_run_method'), $seeder_name));
+		}
+		else
+		{
+			$seeder->run();
+		}
 	}
 }
